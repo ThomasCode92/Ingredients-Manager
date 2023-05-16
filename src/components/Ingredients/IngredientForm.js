@@ -21,7 +21,12 @@ const IngredientForm = props => {
               type="text"
               id="title"
               value={inputState[0].title}
-              onChange={event => inputState[1]({ title: event.target.value })}
+              onChange={event =>
+                inputState[1](prevState => ({
+                  ...prevState,
+                  title: event.target.value,
+                }))
+              }
             />
           </div>
           <div className="form-control">
@@ -30,7 +35,12 @@ const IngredientForm = props => {
               type="number"
               id="amount"
               value={inputState[0].amount}
-              onChange={event => inputState[1]({ amount: event.target.value })}
+              onChange={event =>
+                inputState[1](prevState => ({
+                  ...prevState,
+                  amount: event.target.value,
+                }))
+              }
             />
           </div>
           <div className="ingredient-form__actions">
