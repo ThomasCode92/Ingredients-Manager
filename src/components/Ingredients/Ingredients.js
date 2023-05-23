@@ -7,11 +7,17 @@ import Search from './Search';
 const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
 
-  const addIngredientHandler = ingredient => {
-    setIngredients(prevIngredients => [
-      ...prevIngredients,
-      { id: Math.random(), ...ingredient },
-    ]);
+  const addIngredientHandler = async ingredient => {
+    const response = await fetch('/api/ingredients', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(ingredient),
+    });
+
+    const responseData = await response.json();
+
+    console.log(responseData.message);
+    setIngredients(prevIngredients => [...prevIngredients, responseData.data]);
   };
 
   const removeIngredientHandler = ingredientId => {
