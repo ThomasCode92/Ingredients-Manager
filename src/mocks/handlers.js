@@ -1,6 +1,6 @@
 import { rest } from 'msw';
 
-const ingredients = [];
+const ingredients = [{ id: 123, title: 'Apples', amount: 5 }];
 
 export const handlers = [
   rest.get('/api/ingredients', (req, res, ctx) => {
