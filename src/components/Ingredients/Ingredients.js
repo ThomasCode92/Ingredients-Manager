@@ -21,6 +21,10 @@ const Ingredients = () => {
     fetchIngredients();
   }, []);
 
+  const filteredIngredientsHandler = filteredIngredients => {
+    setIngredients(filteredIngredients);
+  };
+
   const addIngredientHandler = async ingredient => {
     const response = await fetch('/api/ingredients', {
       method: 'POST',
@@ -48,7 +52,7 @@ const Ingredients = () => {
       <IngredientForm onAddIngredient={addIngredientHandler} />
 
       <section>
-        <Search />
+        <Search onLoadIngredients={filteredIngredientsHandler} />
         <IngredientsList
           ingredients={ingredients}
           onRemoveItem={removeIngredientHandler}

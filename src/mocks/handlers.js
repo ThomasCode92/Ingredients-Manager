@@ -4,11 +4,20 @@ const ingredients = [{ id: 123, title: 'Apples', amount: 5 }];
 
 export const handlers = [
   rest.get('/api/ingredients', (req, res, ctx) => {
+    const searchParams = req.url.searchParams;
+    const filter = searchParams.get('filterBy');
+
+    const filteredIngredients = [...ingredients];
+
+    if (filter) {
+      filteredIngredients.filter(ingredient => ingredient.title === filter);
+    }
+
     return res(
       ctx.status(200),
       ctx.json({
         message: 'Ingredients fetched successfully',
-        data: ingredients,
+        data: filteredIngredients,
       })
     );
   }),
