@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import IngredientForm from './IngredientForm';
 import IngredientsList from './IngredientList';
@@ -7,23 +7,9 @@ import Search from './Search';
 const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
 
-  useEffect(() => {
-    const fetchIngredients = async () => {
-      const response = await fetch('/api/ingredients');
-      const responseData = await response.json();
-
-      const loadedIngredients = responseData.data;
-
-      console.log(responseData.message);
-      setIngredients(loadedIngredients);
-    };
-
-    fetchIngredients();
-  }, []);
-
-  const filteredIngredientsHandler = filteredIngredients => {
+  const filteredIngredientsHandler = useCallback(filteredIngredients => {
     setIngredients(filteredIngredients);
-  };
+  }, []);
 
   const addIngredientHandler = async ingredient => {
     const response = await fetch('/api/ingredients', {
