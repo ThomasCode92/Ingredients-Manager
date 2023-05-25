@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import Card from '../UI/Card';
 import './Search.css';
@@ -6,6 +6,7 @@ import './Search.css';
 const Search = props => {
   const { onLoadIngredients } = props;
   const [enteredFilter, setEnteredFilter] = useState('');
+  const inputRef = useRef();
 
   useEffect(() => {
     const fetchIngredients = async () => {
@@ -20,7 +21,11 @@ const Search = props => {
       onLoadIngredients(loadedIngredients);
     };
 
-    fetchIngredients();
+    setTimeout(() => {
+      if (enteredFilter === inputRef.current.value) {
+        fetchIngredients();
+      }
+    }, 500);
   }, [enteredFilter, onLoadIngredients]);
 
   const filterChangeHandler = event => {
@@ -34,6 +39,7 @@ const Search = props => {
           <label>Filter by Title</label>
           <input
             type="text"
+            ref={inputRef}
             value={enteredFilter}
             onChange={filterChangeHandler}
           />
