@@ -10,7 +10,7 @@ const Search = props => {
   useEffect(() => {
     const fetchIngredients = async () => {
       const query =
-        enteredFilter.length === 0 ? '' : `?filterBy="${enteredFilter}"`;
+        enteredFilter.length === 0 ? '' : `?filterBy=${enteredFilter}`;
       const response = await fetch('/api/ingredients' + query);
       const responseData = await response.json();
 

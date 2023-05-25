@@ -7,17 +7,19 @@ export const handlers = [
     const searchParams = req.url.searchParams;
     const filter = searchParams.get('filterBy');
 
-    const filteredIngredients = [...ingredients];
+    let filteredIngredients;
 
     if (filter) {
-      filteredIngredients.filter(ingredient => ingredient.title === filter);
+      filteredIngredients = ingredients.filter(
+        ingredient => ingredient.title === filter
+      );
     }
 
     return res(
       ctx.status(200),
       ctx.json({
         message: 'Ingredients fetched successfully',
-        data: filteredIngredients,
+        data: filteredIngredients || ingredients,
       })
     );
   }),
