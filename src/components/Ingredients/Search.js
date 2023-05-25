@@ -21,11 +21,15 @@ const Search = props => {
       onLoadIngredients(loadedIngredients);
     };
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       if (enteredFilter === inputRef.current.value) {
         fetchIngredients();
       }
     }, 500);
+
+    return () => {
+      clearTimeout(timer);
+    };
   }, [enteredFilter, onLoadIngredients]);
 
   const filterChangeHandler = event => {
