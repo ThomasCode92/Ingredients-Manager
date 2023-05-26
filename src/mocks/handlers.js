@@ -30,6 +30,7 @@ export const handlers = [
     ingredients.push(ingredient);
 
     return res(
+      ctx.delay(1000),
       ctx.status(201),
       ctx.json({
         message: 'Ingredient created successfully',
@@ -44,9 +45,20 @@ export const handlers = [
       ingredient => ingredient.id === ingredientId
     );
 
+    if (ingredientIdx === -1) {
+      return res(
+        ctx.delay(300),
+        ctx.status(404),
+        ctx.json({
+          message: 'Could not delete ingredient',
+        })
+      );
+    }
+
     ingredients.splice(ingredientIdx, 1);
 
     return res(
+      ctx.delay(1000),
       ctx.status(200),
       ctx.json({
         message: 'Ingredient delete successfully',
