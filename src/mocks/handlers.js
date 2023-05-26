@@ -37,4 +37,21 @@ export const handlers = [
       })
     );
   }),
+  rest.delete('/api/ingredients/:id', async (req, res, ctx) => {
+    const ingredientId = parseFloat(req.params.id);
+
+    const ingredientIdx = ingredients.findIndex(
+      ingredient => ingredient.id === ingredientId
+    );
+
+    ingredients.splice(ingredientIdx, 1);
+
+    return res(
+      ctx.status(200),
+      ctx.json({
+        message: 'Ingredient delete successfully',
+        data: ingredients,
+      })
+    );
+  }),
 ];

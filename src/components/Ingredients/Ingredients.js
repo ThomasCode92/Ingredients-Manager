@@ -24,13 +24,15 @@ const Ingredients = () => {
     setIngredients(prevIngredients => [...prevIngredients, responseData.data]);
   };
 
-  const removeIngredientHandler = ingredientId => {
-    setIngredients(prevIngredients => {
-      const updatedIngredients = prevIngredients.filter(
-        ingredient => ingredient.id !== ingredientId
-      );
-      return updatedIngredients;
+  const removeIngredientHandler = async ingredientId => {
+    const response = await fetch('/api/ingredients/' + ingredientId, {
+      method: 'DELETE',
     });
+
+    const responseData = await response.json();
+
+    console.log(responseData.message);
+    setIngredients(responseData.data);
   };
 
   return (
