@@ -1,17 +1,32 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useReducer, useState } from 'react';
 
 import ErrorModal from '../UI/ErrorModal';
 import IngredientForm from './IngredientForm';
 import IngredientsList from './IngredientList';
 import Search from './Search';
 
+const ingredientsReducer = (currentIngredients, action) => {
+  switch (action.type) {
+    case 'SET_INGREDIENTS':
+      return [...action.payload];
+    case 'ADD_INGREDIENT':
+      return [...currentIngredients, action.payload];
+    case 'DELETE_INGREDIENT':
+      return [...currentIngredients].filter(
+        ingredient => ingredient.id !== action.payload
+      );
+    default:
+      throw new Error('No matching identifier found');
+  }
+};
+
 const Ingredients = () => {
-  const [ingredients, setIngredients] = useState([]);
+  const [ingredients, dispatch] = useReducer(ingredientsReducer, []);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const filteredIngredientsHandler = useCallback(filteredIngredients => {
-    setIngredients(filteredIngredients);
+    dispatch({ type: 'SET_INGREDIENTS', payload: filteredIngredients });
   }, []);
 
   const addIngredientHandler = async ingredient => {
@@ -26,7 +41,7 @@ const Ingredients = () => {
     const responseData = await response.json();
 
     console.log(responseData.message);
-    setIngredients(prevIngredients => [...prevIngredients, responseData.data]);
+    dispatch({ type: 'ADD_INGREDIENT', payload: responseData.data });
   };
 
   const removeIngredientHandler = async ingredientId => {
@@ -45,7 +60,7 @@ const Ingredients = () => {
       setIsLoading(false);
 
       console.log(responseData.message);
-      setIngredients(responseData.data);
+      dispatch({ type: 'DELETE_INGREDIENT', payload: responseData.data.id });
     } catch (error) {
       setIsLoading(false);
       setError(error.message);

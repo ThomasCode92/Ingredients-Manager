@@ -55,6 +55,7 @@ export const handlers = [
       );
     }
 
+    const deletedIngredient = ingredients[ingredientIdx];
     ingredients.splice(ingredientIdx, 1);
 
     return res(
@@ -62,7 +63,7 @@ export const handlers = [
       ctx.status(200),
       ctx.json({
         message: 'Ingredient delete successfully',
-        data: ingredients,
+        data: deletedIngredient,
       })
     );
   }),
