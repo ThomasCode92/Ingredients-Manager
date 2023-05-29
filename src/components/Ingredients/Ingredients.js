@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer, useState } from 'react';
+import React, { useCallback, useReducer } from 'react';
 
 import ErrorModal from '../UI/ErrorModal';
 import IngredientForm from './IngredientForm';
@@ -20,33 +20,51 @@ const ingredientsReducer = (currentIngredients, action) => {
   }
 };
 
+const httpReducer = (httpState, action) => {
+  switch (action.type) {
+    case 'SEND':
+      return { isLoading: true, error: null };
+    case 'RESPONSE':
+      return { ...httpState, isLoading: false };
+    case 'ERROR':
+      return { isLoading: false, error: action.payload };
+    default:
+      throw new Error('No matching identifier found');
+  }
+};
+
 const Ingredients = () => {
-  const [ingredients, dispatch] = useReducer(ingredientsReducer, []);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [ingredients, dispatchIngredients] = useReducer(ingredientsReducer, []);
+  const [httpState, dispatchHttpState] = useReducer(httpReducer, {
+    isLoading: false,
+    error: null,
+  });
 
   const filteredIngredientsHandler = useCallback(filteredIngredients => {
-    dispatch({ type: 'SET_INGREDIENTS', payload: filteredIngredients });
+    dispatchIngredients({
+      type: 'SET_INGREDIENTS',
+      payload: filteredIngredients,
+    });
   }, []);
 
   const addIngredientHandler = async ingredient => {
-    setIsLoading(true);
+    dispatchHttpState({ type: 'SEND' });
     const response = await fetch('/api/ingredients', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(ingredient),
     });
 
-    setIsLoading(false);
+    dispatchHttpState({ type: 'RESPONSE' });
     const responseData = await response.json();
 
     console.log(responseData.message);
-    dispatch({ type: 'ADD_INGREDIENT', payload: responseData.data });
+    dispatchIngredients({ type: 'ADD_INGREDIENT', payload: responseData.data });
   };
 
   const removeIngredientHandler = async ingredientId => {
     try {
-      setIsLoading(true);
+      dispatchHttpState({ type: 'SEND' });
       const response = await fetch('/api/ingredients/' + ingredientId, {
         method: 'DELETE',
       });
@@ -57,26 +75,32 @@ const Ingredients = () => {
         throw new Error(responseData.message);
       }
 
-      setIsLoading(false);
-
       console.log(responseData.message);
-      dispatch({ type: 'DELETE_INGREDIENT', payload: responseData.data.id });
+      dispatchHttpState({ type: 'RESPONSE' });
+      dispatchIngredients({
+        type: 'DELETE_INGREDIENT',
+        payload: responseData.data.id,
+      });
     } catch (error) {
-      setIsLoading(false);
-      setError(error.message);
+      console.log(error);
+      dispatchHttpState({ type: 'ERROR', payload: error.message });
     }
   };
 
   const clearError = () => {
-    setError(null);
+    dispatchHttpState({ type: 'ERROR', payload: null });
   };
+
+  console.log(httpState.error);
 
   return (
     <div className="App">
-      {error && <ErrorModal onClose={clearError}>{error}</ErrorModal>}
+      {httpState.error && (
+        <ErrorModal onClose={clearError}>{httpState.error}</ErrorModal>
+      )}
       <IngredientForm
         onAddIngredient={addIngredientHandler}
-        loading={isLoading}
+        loading={httpState.isLoading}
       />
 
       <section>
