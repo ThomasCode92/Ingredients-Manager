@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 
 import ErrorModal from '../UI/ErrorModal';
 import IngredientForm from './IngredientForm';
@@ -47,7 +47,7 @@ const Ingredients = () => {
     });
   }, []);
 
-  const addIngredientHandler = async ingredient => {
+  const addIngredientHandler = useCallback(async ingredient => {
     dispatchHttpState({ type: 'SEND' });
     const response = await fetch('/api/ingredients', {
       method: 'POST',
@@ -60,9 +60,9 @@ const Ingredients = () => {
 
     console.log(responseData.message);
     dispatchIngredients({ type: 'ADD_INGREDIENT', payload: responseData.data });
-  };
+  }, []);
 
-  const removeIngredientHandler = async ingredientId => {
+  const removeIngredientHandler = useCallback(async ingredientId => {
     try {
       dispatchHttpState({ type: 'SEND' });
       const response = await fetch('/api/ingredients/' + ingredientId, {
@@ -85,13 +85,20 @@ const Ingredients = () => {
       console.log(error);
       dispatchHttpState({ type: 'ERROR', payload: error.message });
     }
-  };
+  }, []);
 
-  const clearError = () => {
+  const clearError = useCallback(() => {
     dispatchHttpState({ type: 'ERROR', payload: null });
-  };
+  }, []);
 
-  console.log(httpState.error);
+  const ingredientList = useMemo(() => {
+    return (
+      <IngredientsList
+        ingredients={ingredients}
+        onRemoveItem={removeIngredientHandler}
+      />
+    );
+  }, [ingredients, removeIngredientHandler]);
 
   return (
     <div className="App">
@@ -105,10 +112,7 @@ const Ingredients = () => {
 
       <section>
         <Search onLoadIngredients={filteredIngredientsHandler} />
-        <IngredientsList
-          ingredients={ingredients}
-          onRemoveItem={removeIngredientHandler}
-        />
+        {ingredientList}
       </section>
     </div>
   );
