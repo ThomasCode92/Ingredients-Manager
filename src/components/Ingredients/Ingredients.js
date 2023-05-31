@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useReducer } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 
 import ErrorModal from '../UI/ErrorModal';
 import IngredientForm from './IngredientForm';
@@ -23,17 +23,34 @@ const ingredientsReducer = (currentIngredients, action) => {
 };
 
 const Ingredients = () => {
-  const [ingredients, dispatchIngredients] = useReducer(ingredientsReducer, []);
+  const [ingredients, dispatch] = useReducer(ingredientsReducer, []);
   const { data, isLoading, error, sendRequest } = useHttp();
 
+  useEffect(() => {
+    if (!data) return;
+
+    if (data.httpMethod === 'POST') {
+      return dispatch({ type: 'ADD_INGREDIENT', payload: data.httpData });
+    }
+
+    if (data.httpMethod === 'DELETE') {
+      return dispatch({ type: 'DELETE_INGREDIENT', payload: data.httpData.id });
+    }
+  }, [data]);
+
   const filteredIngredientsHandler = useCallback(filteredIngredients => {
-    dispatchIngredients({
+    dispatch({
       type: 'SET_INGREDIENTS',
       payload: filteredIngredients,
     });
   }, []);
 
-  const addIngredientHandler = useCallback(async ingredient => {}, []);
+  const addIngredientHandler = useCallback(
+    async ingredient => {
+      sendRequest('/api/ingredients', 'POST', JSON.stringify(ingredient));
+    },
+    [sendRequest]
+  );
 
   const removeIngredientHandler = useCallback(
     async ingredientId => {

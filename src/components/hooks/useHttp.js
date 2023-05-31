@@ -31,12 +31,15 @@ const useHttp = () => {
 
       const responseData = await response.json();
 
-      if (response.status !== 200) {
+      if (!response.ok) {
         throw new Error(responseData.message);
       }
 
       console.log(responseData.message);
-      dispatch({ type: 'RESPONSE', payload: responseData.data });
+      dispatch({
+        type: 'RESPONSE',
+        payload: { httpData: responseData.data, httpMethod: method },
+      });
     } catch (error) {
       console.log(error);
       dispatch({ type: 'ERROR', payload: error.message });
