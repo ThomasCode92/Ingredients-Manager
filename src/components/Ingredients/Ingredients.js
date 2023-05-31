@@ -5,6 +5,8 @@ import IngredientForm from './IngredientForm';
 import IngredientsList from './IngredientList';
 import Search from './Search';
 
+import useHttp from '../hooks/useHttp';
+
 const ingredientsReducer = (currentIngredients, action) => {
   switch (action.type) {
     case 'SET_INGREDIENTS':
@@ -20,25 +22,9 @@ const ingredientsReducer = (currentIngredients, action) => {
   }
 };
 
-const httpReducer = (httpState, action) => {
-  switch (action.type) {
-    case 'SEND':
-      return { isLoading: true, error: null };
-    case 'RESPONSE':
-      return { ...httpState, isLoading: false };
-    case 'ERROR':
-      return { isLoading: false, error: action.payload };
-    default:
-      throw new Error('No matching identifier found');
-  }
-};
-
 const Ingredients = () => {
   const [ingredients, dispatchIngredients] = useReducer(ingredientsReducer, []);
-  const [httpState, dispatchHttpState] = useReducer(httpReducer, {
-    isLoading: false,
-    error: null,
-  });
+  const { data, isLoading, error, sendRequest } = useHttp();
 
   const filteredIngredientsHandler = useCallback(filteredIngredients => {
     dispatchIngredients({
@@ -47,49 +33,16 @@ const Ingredients = () => {
     });
   }, []);
 
-  const addIngredientHandler = useCallback(async ingredient => {
-    dispatchHttpState({ type: 'SEND' });
-    const response = await fetch('/api/ingredients', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(ingredient),
-    });
+  const addIngredientHandler = useCallback(async ingredient => {}, []);
 
-    dispatchHttpState({ type: 'RESPONSE' });
-    const responseData = await response.json();
+  const removeIngredientHandler = useCallback(
+    async ingredientId => {
+      sendRequest('/api/ingredients/' + ingredientId, 'DELETE');
+    },
+    [sendRequest]
+  );
 
-    console.log(responseData.message);
-    dispatchIngredients({ type: 'ADD_INGREDIENT', payload: responseData.data });
-  }, []);
-
-  const removeIngredientHandler = useCallback(async ingredientId => {
-    try {
-      dispatchHttpState({ type: 'SEND' });
-      const response = await fetch('/api/ingredients/' + ingredientId, {
-        method: 'DELETE',
-      });
-
-      const responseData = await response.json();
-
-      if (response.status !== 200) {
-        throw new Error(responseData.message);
-      }
-
-      console.log(responseData.message);
-      dispatchHttpState({ type: 'RESPONSE' });
-      dispatchIngredients({
-        type: 'DELETE_INGREDIENT',
-        payload: responseData.data.id,
-      });
-    } catch (error) {
-      console.log(error);
-      dispatchHttpState({ type: 'ERROR', payload: error.message });
-    }
-  }, []);
-
-  const clearError = useCallback(() => {
-    dispatchHttpState({ type: 'ERROR', payload: null });
-  }, []);
+  const clearError = useCallback(() => {}, []);
 
   const ingredientList = useMemo(() => {
     return (
@@ -102,12 +55,10 @@ const Ingredients = () => {
 
   return (
     <div className="App">
-      {httpState.error && (
-        <ErrorModal onClose={clearError}>{httpState.error}</ErrorModal>
-      )}
+      {error && <ErrorModal onClose={clearError}>{error}</ErrorModal>}
       <IngredientForm
         onAddIngredient={addIngredientHandler}
-        loading={httpState.isLoading}
+        loading={isLoading}
       />
 
       <section>
