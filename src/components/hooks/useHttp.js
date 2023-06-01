@@ -1,5 +1,7 @@
 import { useCallback, useReducer } from 'react';
 
+const initialState = { data: null, isLoading: false, error: null };
+
 const httpReducer = (httpState, action) => {
   switch (action.type) {
     case 'SEND':
@@ -8,17 +10,19 @@ const httpReducer = (httpState, action) => {
       return { ...httpState, isLoading: false, data: action.payload };
     case 'ERROR':
       return { isLoading: false, error: action.payload };
+    case 'CLEAR':
+      return { ...initialState };
     default:
       throw new Error('No matching identifier found');
   }
 };
 
 const useHttp = () => {
-  const [httpState, dispatch] = useReducer(httpReducer, {
-    data: null,
-    isLoading: false,
-    error: null,
-  });
+  const [httpState, dispatch] = useReducer(httpReducer, initialState);
+
+  const clear = useCallback(() => {
+    dispatch({ type: 'CLEAR' });
+  }, []);
 
   const sendRequest = useCallback(async (url, method, body) => {
     try {
@@ -51,6 +55,7 @@ const useHttp = () => {
     isLoading: httpState.isLoading,
     error: httpState.error,
     sendRequest: sendRequest,
+    reset: clear,
   };
 };
 

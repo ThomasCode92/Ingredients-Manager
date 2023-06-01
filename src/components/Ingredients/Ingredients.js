@@ -24,7 +24,7 @@ const ingredientsReducer = (currentIngredients, action) => {
 
 const Ingredients = () => {
   const [ingredients, dispatch] = useReducer(ingredientsReducer, []);
-  const { data, isLoading, error, sendRequest } = useHttp();
+  const { data, isLoading, error, sendRequest, reset } = useHttp();
 
   useEffect(() => {
     if (!data) return;
@@ -39,6 +39,7 @@ const Ingredients = () => {
   }, [data]);
 
   const filteredIngredientsHandler = useCallback(filteredIngredients => {
+    console.log(filteredIngredients);
     dispatch({
       type: 'SET_INGREDIENTS',
       payload: filteredIngredients,
@@ -46,20 +47,22 @@ const Ingredients = () => {
   }, []);
 
   const addIngredientHandler = useCallback(
-    async ingredient => {
+    ingredient => {
       sendRequest('/api/ingredients', 'POST', JSON.stringify(ingredient));
     },
     [sendRequest]
   );
 
   const removeIngredientHandler = useCallback(
-    async ingredientId => {
+    ingredientId => {
       sendRequest('/api/ingredients/' + ingredientId, 'DELETE');
     },
     [sendRequest]
   );
 
-  const clearError = useCallback(() => {}, []);
+  const clearError = useCallback(() => {
+    reset();
+  }, [reset]);
 
   const ingredientList = useMemo(() => {
     return (
